@@ -1,9 +1,9 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-const upload = multer({ dest: "uploads/" }); // salva temporariamente
 
 const {
   findDatabaseFile,
@@ -17,19 +17,18 @@ const PORT = process.env.PORT || 3000;
 
 const app = express();
 
-// ✅ CORS seguro para GitHub Pages
+// 🛡️ CORS permitido só para GitHub Pages + local
 const allowedOrigins = [
   "https://ralphcajazeira.github.io",
   "http://localhost:3000",
 ];
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-  })
-);
+app.use(cors({ origin: allowedOrigins }));
 
-// ✅ Rota pública para consultar o banco de dados
+// 🧾 Multer para upload de imagem
+const upload = multer({ dest: "uploads/" });
+
+// 🔁 Rota para listar banco de dados
 app.get("/db", (req, res) => {
   try {
     const data = fs.readFileSync(DB_LOCAL_PATH, "utf-8");
@@ -40,7 +39,7 @@ app.get("/db", (req, res) => {
   }
 });
 
-// Rota de upload de imagem
+// 📤 Rota de upload (apenas salva o nome por enquanto)
 app.post("/upload", upload.single("foto"), async (req, res) => {
   try {
     const file = req.file;
@@ -51,24 +50,24 @@ app.post("/upload", upload.single("foto"), async (req, res) => {
         .json({ success: false, message: "Arquivo não encontrado" });
     }
 
-    // Simula resposta (depois podemos integrar com Google Drive)
+    // Simulação (mais tarde integramos com Drive + banco)
     res.json({
       success: true,
       fileName: file.originalname,
-      info: "Upload recebido com sucesso!",
+      message: "Upload recebido com sucesso!",
     });
   } catch (err) {
-    console.error("Erro no upload:", err);
+    console.error("❌ Erro no upload:", err);
     res
       .status(500)
       .json({ success: false, message: "Erro interno no upload." });
   }
 });
 
+// 🚀 Inicializa e sincroniza banco
 async function init() {
   console.log("🚀 Iniciando verificação do banco no Google Drive...");
 
-  // Cria a pasta local se necessário
   if (!fs.existsSync(path.dirname(DB_LOCAL_PATH))) {
     fs.mkdirSync(path.dirname(DB_LOCAL_PATH));
   }
@@ -85,13 +84,11 @@ async function init() {
     console.log(`✅ Banco criado e enviado ao Drive com ID: ${newId}`);
   }
 
-  // Carrega o banco em memória
   const db = JSON.parse(fs.readFileSync(DB_LOCAL_PATH, "utf-8"));
   console.log(`📄 Banco carregado: ${db.chapas.length} chapas`);
 
-  // ✅ Inicia servidor Express
   app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando na porta ${PORT}`);
+    console.log(`🌐 Servidor rodando em http://localhost:${PORT}`);
   });
 }
 
