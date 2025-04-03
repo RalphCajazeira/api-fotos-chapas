@@ -3,7 +3,9 @@ const fs = require("fs");
 
 // 🔐 Autenticação com a conta de serviço (Railway usa JSON direto da env)
 const auth = new google.auth.GoogleAuth({
-  credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON),
+  ...(process.env.GOOGLE_SERVICE_ACCOUNT_JSON
+    ? { credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON) }
+    : { keyFile: process.env.GOOGLE_SERVICE_ACCOUNT_PATH }),
   scopes: ["https://www.googleapis.com/auth/drive"],
 });
 
