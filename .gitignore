@@ -1,0 +1,4 @@
+/node_modules
+uploads/
+drive-key.json
+.env

@@ -1,0 +1,26 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload Foto</title>
+</head>
+<body>
+  <h1>API de Fotos</h1>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" name="foto" accept="image/*" required>
+    <button type="submit">Enviar Foto</button>
+  </form>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const res = await fetch('/upload', { method: 'POST', body: formData });
+      const json = await res.json();
+      alert(JSON.stringify(json));
+    };
+  </script>
+</body>
+</html>
