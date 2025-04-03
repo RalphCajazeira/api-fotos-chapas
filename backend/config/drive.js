@@ -45,7 +45,7 @@ async function downloadDatabase(fileId, localPath) {
  * 🆕 Cria um novo db.json no Drive se não existir
  */
 async function createDatabaseFile(folderId, localPath) {
-  fs.writeFileSync(localPath, JSON.stringify({ chapas: [] }, null, 2));
+  fs.writeFileSync(localPath, JSON.stringify({}, null, 2));
 
   const fileMetadata = {
     name: "db.json",

@@ -1,0 +1,33 @@
+.menu-grid button {
+  background-color: #007bff;
+  border: none;
+  padding: 0.8rem;
+  color: white;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.menu-grid button:hover {
+  background-color: #0056b3;
+}
+
+ul#listaPastas {
+  list-style: none;
+  padding: 1rem;
+}
+
+ul#listaPastas li {
+  margin-bottom: 1rem;
+  background: #fff;
+  padding: 0.5rem;
+  border-radius: 0.4rem;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+ul#listaPastas input {
+  padding: 0.4rem;
+  margin-left: 0.5rem;
+  font-size: 0.9rem;
+}
