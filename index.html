@@ -21,6 +21,16 @@
         margin: 0.5rem 0;
         font-size: 1rem;
       }
+      .chapa-list {
+        margin-top: 2rem;
+      }
+      .chapa-item {
+        background: #fff;
+        border: 1px solid #ddd;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+      }
     </style>
   </head>
   <body>
@@ -40,9 +50,48 @@
 
     <p id="resposta"></p>
 
+    <div class="chapa-list" id="chapaList">
+      <h2>🔍 Lista de Chapas</h2>
+      <div id="chapasContainer">Carregando...</div>
+    </div>
+
     <script>
       const API_URL = "https://api-fotos-chapas-production.up.railway.app";
 
+      // Fetch lista de chapas
+      async function carregarChapas() {
+        try {
+          const res = await fetch(`${API_URL}/db`);
+          const data = await res.json();
+
+          const container = document.getElementById("chapasContainer");
+          container.innerHTML = "";
+
+          if (!data.chapas || data.chapas.length === 0) {
+            container.innerHTML = "<p>Nenhuma chapa cadastrada.</p>";
+            return;
+          }
+
+          data.chapas.forEach((chapa, i) => {
+            const el = document.createElement("div");
+            el.className = "chapa-item";
+            el.innerHTML = `
+            <strong>Chapa #${i + 1}</strong><br />
+            Nome: ${chapa.nome || "---"}<br />
+            Medidas: ${chapa.comprimento || "-"} x ${chapa.largura || "-"}<br />
+            Código Interno: ${chapa.codigo || "---"}<br />
+            ID: ${chapa.id || "---"}
+          `;
+            container.appendChild(el);
+          });
+        } catch (err) {
+          document.getElementById("chapasContainer").innerHTML =
+            "<p>Erro ao carregar chapas.</p>";
+          console.error("❌ Erro ao buscar /db:", err);
+        }
+      }
+
+      // Envio de imagem
       document.getElementById("uploadForm").onsubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -56,11 +105,11 @@
           });
 
           const text = await res.text();
-          console.log("🔁 Resposta:", text);
-
           const json = JSON.parse(text);
+
           if (json.success) {
-            respostaEl.textContent = `✅ Upload feito! ID: ${json.fileId}`;
+            respostaEl.textContent = `✅ Upload feito! Nome do arquivo: ${json.fileName}`;
+            carregarChapas(); // Atualiza lista após upload
           } else {
             respostaEl.textContent = "❌ Erro no upload: " + json.message;
           }
@@ -69,6 +118,9 @@
           respostaEl.textContent = "❌ Erro ao comunicar com o servidor.";
         }
       };
+
+      // Carrega lista ao abrir a página
+      carregarChapas();
     </script>
   </body>
 </html>

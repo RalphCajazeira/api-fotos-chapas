@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
+const upload = multer({ dest: "uploads/" }); // salva temporariamente
 
 const {
   findDatabaseFile,
@@ -36,6 +37,31 @@ app.get("/db", (req, res) => {
   } catch (err) {
     console.error("❌ Erro ao ler db.json:", err);
     res.status(500).json({ error: "Erro ao ler banco de dados." });
+  }
+});
+
+// Rota de upload de imagem
+app.post("/upload", upload.single("foto"), async (req, res) => {
+  try {
+    const file = req.file;
+
+    if (!file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Arquivo não encontrado" });
+    }
+
+    // Simula resposta (depois podemos integrar com Google Drive)
+    res.json({
+      success: true,
+      fileName: file.originalname,
+      info: "Upload recebido com sucesso!",
+    });
+  } catch (err) {
+    console.error("Erro no upload:", err);
+    res
+      .status(500)
+      .json({ success: false, message: "Erro interno no upload." });
   }
 });
 
