@@ -1,26 +1,40 @@
 <!-- public/index.html -->
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <title>Upload Foto</title>
-</head>
-<body>
-  <h1>API de Fotos</h1>
-  <form id="uploadForm" enctype="multipart/form-data">
-    <input type="file" name="foto" accept="image/*" required>
-    <button type="submit">Enviar Foto</button>
-  </form>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Upload Foto</title>
+  </head>
+  <body>
+    <h1>API de Fotos</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" name="foto" accept="image/*" required />
+      <button type="submit">Enviar Foto</button>
+    </form>
 
-  <script>
-    const form = document.getElementById('uploadForm');
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
-      const res = await fetch('/upload', { method: 'POST', body: formData });
-      const json = await res.json();
-      alert(JSON.stringify(json));
-    };
-  </script>
-</body>
+    <script>
+      const form = document.getElementById("uploadForm");
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        try {
+          const res = await fetch("/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const text = await res.text(); // ← parse manual
+          console.log("📨 Resposta bruta do servidor:", text);
+
+          const json = JSON.parse(text); // tenta transformar em JSON
+          alert("✅ Upload feito!\nArquivo ID: " + json.fileId);
+        } catch (err) {
+          console.error("❌ Erro ao processar resposta:", err);
+          alert("⚠️ Erro ao fazer upload. Veja console.");
+        }
+      };
+    </script>
+  </body>
 </html>

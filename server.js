@@ -1,37 +1,43 @@
-// server/server.js
-require("dotenv").config();
-const express = require("express");
-const multer = require("multer");
-const cors = require("cors");
-const path = require("path");
-const fs = require("fs");
-const { uploadFileToDrive } = require("./utils/drive");
+require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+const {
+  findDatabaseFile,
+  downloadDatabase,
+  createDatabaseFile,
+} = require('./utils/drive');
 
-app.use(cors());
-app.use(express.static("public"));
+const DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_SITE_FOLDER_ID;
+const DB_LOCAL_PATH = path.join(__dirname, 'data', 'db.json');
 
-const upload = multer({ dest: "uploads/" });
+async function init() {
+  console.log('🚀 Iniciando verificação do banco no Google Drive...');
 
-app.post("/upload", upload.single("foto"), async (req, res) => {
-  try {
-    const file = req.file;
-
-    const uploaded = await uploadFileToDrive(
-      file,
-      process.env.GOOGLE_DRIVE_SITE_FOLDER_ID
-    );
-
-    // Apaga arquivo local depois do upload
-    fs.unlinkSync(file.path);
-
-    res.json({ success: true, fileId: uploaded.id });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: err.message });
+  // Cria a pasta local se necessário
+  if (!fs.existsSync(path.dirname(DB_LOCAL_PATH))) {
+    fs.mkdirSync(path.dirname(DB_LOCAL_PATH));
   }
-});
 
-app.listen(PORT, () => console.log(`🔥 Servidor rodando na porta ${PORT}`));
+  const existing = await findDatabaseFile(DRIVE_FOLDER_ID);
+
+  if (existing) {
+    console.log('📥 Banco encontrado no Drive. Baixando...');
+    await downloadDatabase(existing.id, DB_LOCAL_PATH);
+    console.log('✅ Banco sincronizado localmente!');
+  } else {
+    console.log('📁 Banco não encontrado. Criando novo...');
+    const newId = await createDatabaseFile(DRIVE_FOLDER_ID, DB_LOCAL_PATH);
+    console.log(`✅ Banco criado e enviado ao Drive com ID: ${newId}`);
+  }
+
+  // Carrega o banco em memória (caso queira manipular depois)
+  const db = JSON.parse(fs.readFileSync(DB_LOCAL_PATH, 'utf-8'));
+  console.log(`📄 Banco carregado: ${db.chapas.length} chapas`);
+
+  // Aqui você pode iniciar o servidor Express futuramente
+}
+
+init().catch(err => {
+  console.error('❌ Erro ao inicializar:', err);
+});
