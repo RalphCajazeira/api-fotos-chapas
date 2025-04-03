@@ -3,7 +3,9 @@ const fs = require("fs");
 const path = require("path");
 
 const auth = new google.auth.GoogleAuth({
-  keyFile: process.env.GOOGLE_SERVICE_ACCOUNT_PATH,
+  ...(process.env.GOOGLE_SERVICE_ACCOUNT_JSON
+    ? { credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON) }
+    : { keyFile: process.env.GOOGLE_SERVICE_ACCOUNT_PATH }),
   scopes: ["https://www.googleapis.com/auth/drive"],
 });
 
