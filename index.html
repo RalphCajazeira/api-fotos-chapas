@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>API Fotos de Chapas</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 2rem;
+        background-color: #f9f9f9;
+      }
+      h1 {
+        color: #333;
+      }
+      form {
+        margin-top: 1rem;
+      }
+      input,
+      button {
+        padding: 0.6rem;
+        margin: 0.5rem 0;
+        font-size: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📸 API de Fotos de Chapas</h1>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label for="foto">Escolher imagem:</label><br />
+      <input
+        type="file"
+        name="foto"
+        id="foto"
+        accept="image/*"
+        required
+      /><br />
+      <button type="submit">Enviar Foto</button>
+    </form>
+
+    <p id="resposta"></p>
+
+    <script>
+      const API_URL = "https://SEU-BACKEND.up.railway.app"; // substitua com sua URL real
+
+      document.getElementById("uploadForm").onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const respostaEl = document.getElementById("resposta");
+        respostaEl.textContent = "Enviando...";
+
+        try {
+          const res = await fetch(`${API_URL}/upload`, {
+            method: "POST",
+            body: formData,
+          });
+
+          const text = await res.text();
+          console.log("🔁 Resposta:", text);
+
+          const json = JSON.parse(text);
+          if (json.success) {
+            respostaEl.textContent = `✅ Upload feito! ID: ${json.fileId}`;
+          } else {
+            respostaEl.textContent = "❌ Erro no upload: " + json.message;
+          }
+        } catch (err) {
+          console.error("❌ Erro:", err);
+          respostaEl.textContent = "❌ Erro ao comunicar com o servidor.";
+        }
+      };
+    </script>
+  </body>
+</html>
