@@ -10,8 +10,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/ping", (req, res) => res.send("pong 🧠"));
 
-const databaseRoutes = require("./modules/database/database.routes");
-app.use("/database", databaseRoutes);
+const dbTestRoutes = require("./modules/database/db.routes");
+app.use("/", dbTestRoutes); // ou /utils se quiser agrupar
 
 const folderRoutes = require("./modules/folder/folder.routes");
 app.use("/folders", folderRoutes);

@@ -2,7 +2,9 @@ const express = require("express");
 const router = express.Router();
 const controller = require("./folder.controller");
 
-// 🔧 POST /folders → Cria uma nova pasta
-router.post("/", controller.create);
+router.get("/", controller.listFolders);
+router.post("/", controller.createFolder);
+router.put("/:id", controller.renameFolder);
+router.delete("/:id", controller.deleteFolder);
 
 module.exports = router;
