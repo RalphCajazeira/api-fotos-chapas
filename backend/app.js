@@ -10,4 +10,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/ping", (req, res) => res.send("pong 🧠"));
 
+const databaseRoutes = require("./modules/database/database.routes");
+app.use("/database", databaseRoutes);
+
+// const pastaRoutes = require("./modules/folder/folder.routes");
+// app.use("/pastas", pastaRoutes);
+
 module.exports = app;

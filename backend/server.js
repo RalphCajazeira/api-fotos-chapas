@@ -3,7 +3,11 @@ const path = require("path");
 const fs = require("fs");
 const app = require("./app");
 
-const { findDatabaseFile, downloadDatabase, createDatabaseFile } = require("./config/drive");
+const {
+  findDatabaseFile,
+  downloadDatabase,
+  createDatabaseFile,
+} = require("./libs/drive");
 
 const DB_LOCAL_PATH = path.join(__dirname, "data", "db.json");
 const DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_SITE_FOLDER_ID;

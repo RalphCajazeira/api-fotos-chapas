@@ -1,3 +1,3 @@
 document.getElementById('btnGrid').onclick = () => {
-  alert('Alternar modo grid...');
+  alert('Alternar modo grid em criação...');
 };
