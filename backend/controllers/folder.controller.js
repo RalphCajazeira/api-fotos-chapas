@@ -1,4 +1,4 @@
-const service = require("./folder.service");
+const service = require("../services/folder.service");
 
 async function listFolders(req, res) {
   try {
@@ -14,7 +14,9 @@ async function createFolder(req, res) {
   try {
     const { name, parent_id = null } = req.body;
     if (!name) {
-      return res.status(400).json({ success: false, error: "Name is required" });
+      return res
+        .status(400)
+        .json({ success: false, error: "Name is required" });
     }
 
     const folder = await service.createFolder(name, parent_id);
@@ -31,7 +33,9 @@ async function renameFolder(req, res) {
     const { newName } = req.body;
 
     if (!newName) {
-      return res.status(400).json({ success: false, error: "New name is required" });
+      return res
+        .status(400)
+        .json({ success: false, error: "New name is required" });
     }
 
     const updated = await service.renameFolder(id, newName);

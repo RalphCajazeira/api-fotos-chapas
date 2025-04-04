@@ -1,5 +1,5 @@
-const db = require("../../database/connection");
-const { drive } = require("../../libs/drive");
+const db = require("../database/connection");
+const { drive } = require("../libs/drive");
 const isProduction = process.env.NODE_ENV === "production";
 
 // 🔍 Listar todas as pastas

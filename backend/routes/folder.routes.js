@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const controller = require("./folder.controller");
+const controller = require("../controllers/folder.controller");
 
 router.get("/", controller.listFolders);
 router.post("/", controller.createFolder);
