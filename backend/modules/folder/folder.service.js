@@ -79,7 +79,9 @@ async function createFolder(name, parentId = null) {
     console.log("✅ Folder created and saved:", newFolder);
     return newFolder;
   } catch (error) {
-    console.error("❌ Error in createFolder:", error.message);
+    if (!isProduction) {
+      console.error("❌ Error in createFolder:", error.message);
+    }
     throw error;
   }
 }

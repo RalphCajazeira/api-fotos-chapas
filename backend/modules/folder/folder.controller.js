@@ -11,7 +11,9 @@ async function create(req, res) {
     const folder = await service.createFolder(name, parentId);
     res.status(201).json({ success: true, folder });
   } catch (err) {
-    console.error("❌ Controller error:", err.message);
+    if (!isProduction) {
+      console.error("❌ Controller error:", err.message);
+    }
     res.status(500).json({ success: false, error: err.message });
   }
 }
