@@ -71,7 +71,27 @@ async function createDatabaseFile(folderId, localPath) {
   return file.data.id;
 }
 
-// 📤 Faz upload de qualquer arquivo para o Drive, retorna nome e ID
+// 📤 Atualiza o conteúdo de db.json no Drive (sincronização)
+async function uploadDatabaseFile(content) {
+  const folderId = process.env.GOOGLE_DRIVE_SITE_FOLDER_ID;
+  const existing = await findDatabaseFile(folderId);
+
+  if (!existing?.id) {
+    throw new Error("db.json not found on Drive");
+  }
+
+  await drive.files.update({
+    fileId: existing.id,
+    media: {
+      mimeType: "application/json",
+      body: content,
+    },
+  });
+
+  console.log("📤 db.json atualizado no Google Drive");
+}
+
+// 📤 Faz upload genérico de arquivos (ex: imagens, pdfs, etc.)
 async function uploadFileToDrive(file, folderId) {
   const metadata = {
     name: file.originalname,
@@ -92,11 +112,12 @@ async function uploadFileToDrive(file, folderId) {
   return res.data;
 }
 
-// 🔁 Exporta funções e drive instance
+// 🔁 Exporta tudo
 module.exports = {
   drive,
   findDatabaseFile,
   downloadDatabase,
   createDatabaseFile,
+  uploadDatabaseFile,
   uploadFileToDrive,
 };

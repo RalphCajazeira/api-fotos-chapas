@@ -1,17 +1,28 @@
 const fs = require("fs");
 const path = require("path");
-const { drive } = require("../../libs/drive");
+const { drive, uploadDatabaseFile } = require("../../libs/drive");
 
 const DB_PATH = path.join(__dirname, "../../data/db.json");
 const ROOT_FOLDER = process.env.GOOGLE_DRIVE_SITE_FOLDER_ID;
 
 function loadDB() {
   const raw = fs.readFileSync(DB_PATH, "utf-8");
-  return raw.trim() ? JSON.parse(raw) : { lastId: 0, nodes: [] };
+  const db = raw.trim() ? JSON.parse(raw) : {};
+
+  db.lastId = db.lastId || 0;
+  db.nodes = Array.isArray(db.nodes) ? db.nodes : [];
+
+  return db;
 }
 
 function saveDB(data) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
+  const content = JSON.stringify(data, null, 2);
+  fs.writeFileSync(DB_PATH, content);
+
+  // 🔁 Atualiza no Drive também
+  uploadDatabaseFile(content).catch((err) =>
+    console.error("❌ Failed to sync db.json to Drive:", err.message)
+  );
 }
 
 function generateId(db) {
@@ -19,38 +30,58 @@ function generateId(db) {
   return db.lastId;
 }
 
-async function createFolder(name, parentId) {
-  console.log("🚀 Creating folder on Google Drive:", name);
+async function createFolder(name, parentId = null) {
+  try {
+    console.log("🚀 Creating folder on Google Drive:", name);
 
-  const metadata = {
-    name,
-    mimeType: "application/vnd.google-apps.folder",
-    ...(parentId || ROOT_FOLDER ? { parents: [parentId || ROOT_FOLDER] } : {}),
-  };
+    const db = loadDB();
 
-  const driveRes = await drive.files.create({
-    requestBody: metadata,
-    fields: "id, name",
-  });
+    // 🚫 Impede duplicadas no mesmo diretório
+    const folderExists = db.nodes.some(
+      (n) =>
+        n.type === "folder" &&
+        n.name.toLowerCase() === name.toLowerCase() &&
+        (n.parentId || null) === (parentId || null)
+    );
 
-  // ✅ Correto: acessa direto de res.data
-  const { id: driveId, name: driveName } = driveRes.data;
+    if (folderExists) {
+      throw new Error(`❌ Folder "${name}" already exists in this directory`);
+    }
 
-  const db = loadDB();
-  const newFolder = {
-    id: generateId(db),
-    type: "folder",
-    name: driveName,
-    driveId,
-    parentId: parentId || null,
-    children: [],
-  };
+    // 📁 Criação no Google Drive
+    const metadata = {
+      name,
+      mimeType: "application/vnd.google-apps.folder",
+      parents: [parentId || ROOT_FOLDER],
+    };
 
-  db.nodes.push(newFolder);
-  saveDB(db);
+    const driveRes = await drive.files.create({
+      requestBody: metadata,
+      fields: "id, name",
+    });
 
-  console.log("✅ Folder created successfully:", newFolder);
-  return newFolder;
+    const { id: driveId, name: driveName } = driveRes.data;
+
+    if (!driveId) throw new Error("❌ Failed to create folder on Drive");
+
+    const newFolder = {
+      id: generateId(db),
+      type: "folder",
+      name: driveName,
+      driveId,
+      parentId: parentId || null,
+      children: [],
+    };
+
+    db.nodes.push(newFolder);
+    saveDB(db);
+
+    console.log("✅ Folder created and saved:", newFolder);
+    return newFolder;
+  } catch (error) {
+    console.error("❌ Error in createFolder:", error.message);
+    throw error;
+  }
 }
 
 module.exports = {
