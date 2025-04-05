@@ -16,4 +16,8 @@ app.use("/", dbTestRoutes); // ou /utils se quiser agrupar
 const folderRoutes = require("./routes/folder.routes");
 app.use("/folders", folderRoutes);
 
+// Reset do servidor
+const resetRoutes = require("./routes/reset.routes");
+app.use("/admin", resetRoutes); // => POST http://localhost:3000/admin/reset
+
 module.exports = app;
