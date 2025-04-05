@@ -13,8 +13,11 @@ app.get("/ping", (req, res) => res.send("pong 🧠"));
 const dbTestRoutes = require("./modules/database/db.routes");
 app.use("/", dbTestRoutes); // ou /utils se quiser agrupar
 
-const folderRoutes = require("./routes/folder.routes");
+const folderRoutes = require("./modules/folder/folder.routes");
 app.use("/folders", folderRoutes);
+
+const fileRoutes = require("./modules/file/file.routes");
+app.use("/files", fileRoutes);
 
 // Reset do servidor
 const resetRoutes = require("./routes/reset.routes");

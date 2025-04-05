@@ -1,4 +1,4 @@
-const service = require("../services/folder.service");
+const service = require("./folder.service");
 const isProduction = process.env.NODE_ENV === "production";
 
 // 🔍 GET /folders → Lista pastas ou filtra por parent_id
