@@ -1,23 +1,41 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>API de Fotos</title>
-  <link rel="stylesheet" href="./index.css" />
+  <link rel="stylesheet" href="./styles/base.css" />
+  <link rel="stylesheet" href="./styles/layout.css" />
+  <link rel="stylesheet" href="./styles/header.css" />
+  <link rel="stylesheet" href="./styles/explorer.css" />
 </head>
 <body>
-  <main class="container">
+  <header class="header">
     <h1>📷 API de Fotos</h1>
-    <div class="menu-grid">
-      <button id="btnHome">🏠 Início</button>
-      <button id="btnPasta">📁 Criar Pasta</button>
-      <button id="btnFoto">📸 Tirar Foto</button>
-      <button id="btnGrid">🧱 Modo Grid</button>
-      <button id="btnRelatorio">📊 Relatório</button>
+    <div class="actions">
+      <button id="btnCriarPasta">📁 Criar Pasta</button>
+      <button id="btnTirarFoto">📸 Tirar Foto</button>
     </div>
-    <p class="caminho">Caminho: <span id="caminhoAtual">/</span></p>
+  </header>
+
+  <main class="main">
+    <div id="navegacao" class="navegacao">
+      <!-- Navegação de pastas e arquivos aparece aqui -->
+    </div>
   </main>
+
+  <!-- Modal Criar Pasta -->
+  <div id="modalCriarPasta" class="modal hidden">
+    <div class="modal-content">
+      <h2>Nova Pasta</h2>
+      <input type="text" id="inputNomePasta" placeholder="Nome da nova pasta" />
+      <div class="modal-actions">
+        <button id="cancelarCriacao">Cancelar</button>
+        <button id="confirmarCriacao">Criar</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="./index.js"></script>
 </body>
 </html>

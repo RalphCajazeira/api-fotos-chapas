@@ -1,0 +1,50 @@
+.breadcrumb {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.breadcrumb button {
+  padding: 6px 10px;
+  font-size: 14px;
+  margin-right: 6px;
+  cursor: pointer;
+}
+
+.breadcrumb-path {
+  font-size: 14px;
+  word-wrap: break-word;
+}
+
+.breadcrumb-path span {
+  font-weight: bold;
+}
+
+.breadcrumb-link {
+  text-decoration: underline;
+  cursor: pointer;
+  color: blue;
+}
+
+.pastas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pasta-item {
+  background: #f0f0f0;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.diretorio-vazio {
+  padding: 10px;
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  font-size: 15px;
+}
