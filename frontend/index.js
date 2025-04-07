@@ -46,6 +46,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  btnFoto.onclick = () => abrirModalFoto();
+  document.getElementById("btnSalvarFoto").onclick = () =>
+    uploadFoto(pastaAtualId);
+
   atualizar(null);
 });
 
@@ -61,13 +65,20 @@ async function atualizar(pastaId) {
     const dados = await res.json();
     let pastas = Array.isArray(dados.data) ? dados.data : [];
 
-    // Filtro apenas quando estiver na raiz
+    // ⚠️ Filtrar pastas com IDs válidos
+    pastas = pastas.filter((p) => typeof p.id === "number");
+
     if (pastaId === null) {
       pastas = pastas.filter((p) => p.parent_id === null);
     }
 
     renderPastas(pastas);
-    renderBreadcrumb(pastaId);
+
+    if (typeof pastaId === "number" || pastaId === null) {
+      await renderBreadcrumb(pastaId);
+    } else {
+      console.warn("⚠️ renderBreadcrumb chamado com ID inválido:", pastaId);
+    }
   } catch (e) {
     showMensagem("Erro ao carregar pastas.");
   } finally {
@@ -89,16 +100,26 @@ function renderPastas(pastas) {
       const el = document.createElement("div");
       el.className = "pasta-item";
       el.textContent = `📁 ${pasta.name}`;
-      el.onclick = () => atualizar(pasta.id);
+
+      if (pasta.id !== undefined && pasta.id !== null) {
+        el.onclick = () => atualizar(pasta.id);
+      } else {
+        console.warn("⚠️ Pasta sem ID válida:", pasta);
+      }
+
       area.appendChild(el);
     });
   }
 
-  // Garantia: sempre esconder carregando
   document.getElementById("loading").classList.add("hidden");
 }
 
 async function renderBreadcrumb(pastaId) {
+  if (pastaId === undefined) {
+    console.warn("⚠️ ID de pasta undefined — renderBreadcrumb abortado.");
+    return;
+  }
+
   const bc = document.getElementById("breadcrumb");
   bc.innerHTML = "";
   const caminho = [];
@@ -119,10 +140,8 @@ async function renderBreadcrumb(pastaId) {
     }
   }
 
-  // Sempre incluir a raiz no início
   caminho.unshift({ id: null, name: "Início" });
 
-  // Renderizar caminho
   caminho.forEach((pasta, index) => {
     const span = document.createElement("span");
     span.textContent = pasta.name;
@@ -138,7 +157,3 @@ async function renderBreadcrumb(pastaId) {
     }
   });
 }
-
-btnFoto.onclick = () => abrirModalFoto();
-document.getElementById("btnSalvarFoto").onclick = () =>
-  uploadFoto(pastaAtualId);

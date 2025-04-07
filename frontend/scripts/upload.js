@@ -16,12 +16,20 @@ export async function uploadFoto(pastaId) {
   }
 
   const formData = new FormData();
-  formData.append("file", file, nome + ".jpg"); // renomeia imagem
-  formData.append("nome", nome);
-  formData.append("comprimento", comprimento);
-  formData.append("largura", largura);
-  formData.append("codigo", codeInterno);
-  formData.append("parent_id", pastaId);
+  formData.append("file", file, nome + ".jpg");            // ✅ nome do arquivo
+  formData.append("folder_id", pastaId);                   // ✅ ID da pasta (correto)
+  formData.append("internal_code", codeInterno);           // ✅ Código interno
+  formData.append("width", comprimento);                   // ✅ comprimento
+  formData.append("height", largura);                      // ✅ largura
+
+  // 🔍 Log para ver o que está sendo enviado
+  console.log("📦 ENVIANDO FORM:", {
+    file,
+    folder_id: pastaId,
+    internal_code: codeInterno,
+    width: comprimento,
+    height: largura,
+  });
 
   toggleLoading(true);
   try {
@@ -29,13 +37,17 @@ export async function uploadFoto(pastaId) {
       method: "POST",
       body: formData,
     });
+
+    const responseText = await res.text(); // Captura a resposta como texto
+    console.log("📥 RESPOSTA:", responseText); // 🔍 Mostra retorno
+
     if (!res.ok) throw new Error("Erro no upload");
 
-    showMensagem("Foto enviada com sucesso!");
+    showMensagem("📸 Foto enviada com sucesso!");
     document.getElementById("modal-tirar-foto").classList.add("hidden");
   } catch (err) {
     showMensagem("Erro ao enviar foto.");
-    console.error(err);
+    console.error("❌ uploadFoto ERRO:", err);
   } finally {
     toggleLoading(false);
   }
