@@ -8,7 +8,6 @@ export async function renderizarNavegacao(pastaAtualId, aoSelecionarPasta) {
   const arquivos = await listarArquivos(pastaAtualId);
   const caminho = await buscarCaminho(pastaAtualId);
 
-  // 🔗 Breadcrumb
   const header = document.createElement("div");
   header.classList.add("breadcrumb");
 
@@ -44,7 +43,6 @@ export async function renderizarNavegacao(pastaAtualId, aoSelecionarPasta) {
   header.appendChild(pathSpan);
   navegacao.appendChild(header);
 
-  // 🧾 Conteúdo (pastas + arquivos)
   const lista = document.createElement("div");
   lista.classList.add("navegacao");
 
@@ -55,6 +53,7 @@ export async function renderizarNavegacao(pastaAtualId, aoSelecionarPasta) {
     lista.appendChild(vazio);
   }
 
+  // 🟡 Pastas
   pastas.forEach((pasta) => {
     const item = document.createElement("div");
     item.classList.add("pasta-item");
@@ -63,10 +62,22 @@ export async function renderizarNavegacao(pastaAtualId, aoSelecionarPasta) {
     lista.appendChild(item);
   });
 
+  // 🟢 Arquivos (com preview)
   arquivos.forEach((arquivo) => {
     const item = document.createElement("div");
     item.classList.add("arquivo-item");
-    item.innerHTML = `🖼️ <strong>${arquivo.name}</strong> - ${arquivo.width} x ${arquivo.height} - Cod. ${arquivo.internal_code}`;
+
+    const imagem = document.createElement("img");
+    imagem.src = `https://drive.google.com/uc?id=${arquivo.drive_id}`;
+    imagem.alt = arquivo.name;
+    imagem.loading = "lazy";
+    imagem.classList.add("arquivo-preview");
+
+    const texto = document.createElement("div");
+    texto.innerHTML = `<strong>${arquivo.name}</strong><br>${arquivo.width} x ${arquivo.height} - Cod. ${arquivo.internal_code}`;
+
+    item.appendChild(imagem);
+    item.appendChild(texto);
     lista.appendChild(item);
   });
 
