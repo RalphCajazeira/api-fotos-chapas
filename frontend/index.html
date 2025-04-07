@@ -1,41 +1,77 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>API de Fotos</title>
-  <link rel="stylesheet" href="./styles/base.css" />
-  <link rel="stylesheet" href="./styles/layout.css" />
-  <link rel="stylesheet" href="./styles/header.css" />
-  <link rel="stylesheet" href="./styles/explorer.css" />
-</head>
-<body>
-  <header class="header">
-    <h1>📷 API de Fotos</h1>
-    <div class="actions">
-      <button id="btnCriarPasta">📁 Criar Pasta</button>
-      <button id="btnTirarFoto">📸 Tirar Foto</button>
-    </div>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Explorador de Fotos</title>
+    <meta
+      name="description"
+      content="Organize e visualize fotos e pastas em estilo explorador de arquivos."
+    />
+    <link rel="stylesheet" href="./styles/main.css" />
+  </head>
+  <body>
+    <header class="nav-bar">
+      <div class="nav-buttons">
+        <button id="btnHome">🏠 Início</button>
+        <button id="btnCriarPasta">📁 Criar Pasta</button>
+        <button id="btnFoto">📸 Tirar Foto</button>
+      </div>
+      <div id="breadcrumb" class="breadcrumb"></div>
+    </header>
 
-  <main class="main">
-    <div id="navegacao" class="navegacao">
-      <!-- Navegação de pastas e arquivos aparece aqui -->
-    </div>
-  </main>
+    <div id="mensagem" class="mensagem hidden"></div>
+    <div id="loading" class="loading hidden">Carregando...</div>
 
-  <!-- Modal Criar Pasta -->
-  <div id="modalCriarPasta" class="modal hidden">
-    <div class="modal-content">
-      <h2>Nova Pasta</h2>
-      <input type="text" id="inputNomePasta" placeholder="Nome da nova pasta" />
-      <div class="modal-actions">
-        <button id="cancelarCriacao">Cancelar</button>
-        <button id="confirmarCriacao">Criar</button>
+    <main>
+      <div id="navegacao" class="navegacao"></div>
+    </main>
+
+    <div id="modalCriarPasta" class="modal hidden">
+      <div class="modal-content">
+        <h2>Nova Pasta</h2>
+        <input
+          type="text"
+          id="inputNomePasta"
+          placeholder="Nome da nova pasta"
+        />
+        <div class="modal-actions">
+          <button id="cancelarCriacao">Cancelar</button>
+          <button id="confirmarCriacao">Criar</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <script type="module" src="./index.js"></script>
-</body>
+    <div id="modal-tirar-foto" class="modal hidden">
+      <div class="modal-content">
+        <h2>Tirar Foto</h2>
+        <input
+          type="file"
+          id="modal-file"
+          accept="image/*"
+          capture="environment"
+        />
+
+        <input type="text" id="modal-nome" placeholder="Nome da Imagem" />
+        <input type="text" id="modal-comprimento" placeholder="Comprimento *" />
+        <input type="text" id="modal-largura" placeholder="Largura *" />
+        <input
+          type="text"
+          id="modal-codeInterno"
+          placeholder="Código Interno"
+        />
+
+        <div class="modal-actions">
+          <button
+            onclick="document.getElementById('modal-tirar-foto').classList.add('hidden')"
+          >
+            Cancelar
+          </button>
+          <button id="btnSalvarFoto">Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./index.js"></script>
+  </body>
 </html>
