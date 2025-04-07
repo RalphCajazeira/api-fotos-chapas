@@ -4,50 +4,55 @@ import { showMensagem, toggleLoading } from "./ui.js";
 export async function uploadFoto(pastaId) {
   const fileInput = document.getElementById("modal-file");
   const file = fileInput.files[0];
-  if (!file) return showMensagem("Selecione uma imagem.");
-
   const nome = document.getElementById("modal-nome").value.trim();
-  const comprimento = document.getElementById("modal-comprimento").value.trim();
   const largura = document.getElementById("modal-largura").value.trim();
-  const codeInterno = document.getElementById("modal-codeInterno").value.trim();
+  const altura = document.getElementById("modal-comprimento").value.trim();
+  const codigo = document.getElementById("modal-codeInterno").value.trim();
 
-  if (!nome || !comprimento || !largura) {
-    return showMensagem("Preencha todos os campos obrigatórios.");
+  if (!file || !nome || !largura || !altura || !codigo) {
+    return showMensagem("Preencha todos os campos e selecione uma imagem.");
+  }
+
+  if (!pastaId) {
+    return showMensagem("Você precisa estar dentro de uma pasta.");
   }
 
   const formData = new FormData();
-  formData.append("file", file, nome + ".jpg"); // ✅ nome do arquivo
-  formData.append("folder_id", pastaId); // ✅ ID da pasta (correto)
-  formData.append("internal_code", codeInterno); // ✅ Código interno
-  formData.append("width", comprimento); // ✅ comprimento
-  formData.append("height", largura); // ✅ largura
+  formData.append("file", file);
+  formData.append("folder_id", pastaId);
+  formData.append("name", nome);
+  formData.append("width", largura);
+  formData.append("height", altura);
+  formData.append("internal_code", codigo);
 
-  // 🔍 Log para ver o que está sendo enviado
   console.log("📦 ENVIANDO FORM:", {
     file,
     folder_id: pastaId,
-    internal_code: codeInterno,
-    width: comprimento,
-    height: largura,
+    internal_code: codigo,
+    width: largura,
+    height: altura,
   });
 
   toggleLoading(true);
+
   try {
     const response = await fetch(`${API_BASE_URL}/files`, {
       method: "POST",
       body: formData,
     });
 
-    const responseText = await res.text(); // Captura a resposta como texto
-    console.log("📥 RESPOSTA:", responseText); // 🔍 Mostra retorno
+    const text = await response.text();
+    console.log("📥 RESPOSTA:", text);
 
-    if (!res.ok) throw new Error("Erro no upload");
+    if (!response.ok) {
+      throw new Error("Erro no upload");
+    }
 
-    showMensagem("📸 Foto enviada com sucesso!");
+    showMensagem("Upload realizado com sucesso!");
     document.getElementById("modal-tirar-foto").classList.add("hidden");
   } catch (err) {
-    showMensagem("Erro ao enviar foto.");
     console.error("❌ uploadFoto ERRO:", err);
+    showMensagem("Erro ao enviar a foto. Tente novamente.");
   } finally {
     toggleLoading(false);
   }
