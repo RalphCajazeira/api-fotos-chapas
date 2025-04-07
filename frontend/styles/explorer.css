@@ -49,21 +49,19 @@
   font-size: 15px;
 }
 
-.arquivo-item {
+.arquivo-actions {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  margin-bottom: 8px;
+  gap: 8px;
+  margin-top: 6px;
 }
-
-.arquivo-preview {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
+.arquivo-actions button {
+  padding: 4px 8px;
+  font-size: 13px;
+  background: #eee;
+  border: 1px solid #ccc;
   border-radius: 4px;
-  border: 1px solid #ddd;
+  cursor: pointer;
+}
+.arquivo-actions button:hover {
+  background-color: #ddd;
 }

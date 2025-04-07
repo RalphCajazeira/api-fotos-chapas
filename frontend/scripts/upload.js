@@ -1,5 +1,5 @@
-import { API_BASE_URL } from './config.js';
-import { showMensagem, toggleLoading } from './ui.js';
+import { API_BASE_URL } from "./config.js";
+import { showMensagem, toggleLoading } from "./ui.js";
 
 export async function uploadFoto(pastaId) {
   const fileInput = document.getElementById("modal-file");
@@ -16,11 +16,11 @@ export async function uploadFoto(pastaId) {
   }
 
   const formData = new FormData();
-  formData.append("file", file, nome + ".jpg");            // ✅ nome do arquivo
-  formData.append("folder_id", pastaId);                   // ✅ ID da pasta (correto)
-  formData.append("internal_code", codeInterno);           // ✅ Código interno
-  formData.append("width", comprimento);                   // ✅ comprimento
-  formData.append("height", largura);                      // ✅ largura
+  formData.append("file", file, nome + ".jpg"); // ✅ nome do arquivo
+  formData.append("folder_id", pastaId); // ✅ ID da pasta (correto)
+  formData.append("internal_code", codeInterno); // ✅ Código interno
+  formData.append("width", comprimento); // ✅ comprimento
+  formData.append("height", largura); // ✅ largura
 
   // 🔍 Log para ver o que está sendo enviado
   console.log("📦 ENVIANDO FORM:", {
@@ -33,7 +33,7 @@ export async function uploadFoto(pastaId) {
 
   toggleLoading(true);
   try {
-    const res = await fetch(`${API_BASE_URL}/upload`, {
+    const response = await fetch(`${API_BASE_URL}/files`, {
       method: "POST",
       body: formData,
     });
