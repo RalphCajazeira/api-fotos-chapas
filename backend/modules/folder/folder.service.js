@@ -28,7 +28,6 @@ async function createFolder(name, parent_id = null) {
       parentDriveId = parent.drive_id;
     }
 
-    // 📁 Criação no Google Drive
     const metadata = {
       name,
       mimeType: "application/vnd.google-apps.folder",
@@ -40,7 +39,6 @@ async function createFolder(name, parent_id = null) {
       fields: "id, name",
     });
 
-    // 💾 Salva no banco
     const [folder] = await db("folders")
       .insert({
         name,
@@ -57,39 +55,41 @@ async function createFolder(name, parent_id = null) {
   }
 }
 
-// ✏️ Renomear pasta no Drive e no banco
-async function renameFolder(id, newName) {
+// ✏️ Renomear e/ou mover pasta
+async function renameFolder(id, name, parent_id = null) {
   try {
     const folder = await db("folders").where({ id }).first();
     if (!folder) throw new Error(`Folder with ID ${id} not found`);
 
-    if (folder.name === newName) {
-      throw new Error("New name is the same as the current name");
+    if (folder.name === name && folder.parent_id === parent_id) {
+      throw new Error("Nenhuma alteração detectada");
     }
 
     const nameConflict = await db("folders")
-      .where({ name: newName, parent_id: folder.parent_id })
+      .where({ name, parent_id })
       .andWhereNot({ id })
       .first();
 
     if (nameConflict) {
-      throw new Error(`Folder "${newName}" already exists in this directory`);
+      throw new Error(`Já existe uma pasta chamada "${name}" neste destino.`);
     }
 
+    // Atualiza nome no Google Drive
     await drive.files.update({
       fileId: folder.drive_id,
-      requestBody: { name: newName },
+      requestBody: { name },
     });
 
+    // Atualiza banco
     const [updated] = await db("folders")
       .where({ id })
-      .update({ name: newName })
+      .update({ name, parent_id })
       .returning("*");
 
     return updated;
   } catch (error) {
     if (!isProduction)
-      console.error("❌ Error renaming folder:", error.message);
+      console.error("❌ Error renaming/moving folder:", error.message);
     throw error;
   }
 }
@@ -113,6 +113,7 @@ async function deleteFolder(id) {
   }
 }
 
+// 🔍 Buscar por ID
 async function getFolderById(id) {
   try {
     return await db("folders").where({ id }).first();
@@ -123,6 +124,7 @@ async function getFolderById(id) {
   }
 }
 
+// 🔍 Buscar pastas filhas
 async function getFoldersByParent(parentId) {
   try {
     const query = db("folders").select("*");
@@ -133,13 +135,14 @@ async function getFoldersByParent(parentId) {
 
     return query.where("parent_id", parentId);
   } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
+    if (!isProduction) {
       console.error("❌ Error fetching folders by parent:", error.message);
     }
     throw error;
   }
 }
 
+// ⚠️ Apenas se não quiser sincronizar com Drive (uso interno)
 async function updateFolder(id, data) {
   return await db("folders")
     .where({ id })
