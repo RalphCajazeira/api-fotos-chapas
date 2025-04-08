@@ -1,16 +1,29 @@
 import { API_BASE_URL } from "./config.js";
 import { showMensagem, toggleLoading } from "./ui.js";
+import { atualizar } from "../index.js";
+
+// 🧠 Formata número brasileiro com vírgula para ponto, e força 2 casas
+function formatarNumero(valor) {
+  const num = parseFloat((valor || "").replace(",", "."));
+  return isNaN(num) ? null : num.toFixed(2);
+}
 
 export async function uploadFoto(pastaId) {
   const fileInput = document.getElementById("modal-file");
   const file = fileInput.files[0];
+
   const nome = document.getElementById("modal-nome").value.trim();
-  const largura = document.getElementById("modal-largura").value.trim();
-  const altura = document.getElementById("modal-comprimento").value.trim();
+  const largura = formatarNumero(
+    document.getElementById("modal-largura").value.trim()
+  );
+  const altura = formatarNumero(
+    document.getElementById("modal-comprimento").value.trim()
+  );
   const codigo = document.getElementById("modal-codeInterno").value.trim();
 
-  if (!file || !nome || !largura || !altura || !codigo) {
-    return showMensagem("Preencha todos os campos e selecione uma imagem.");
+  // ✅ Apenas largura e altura são obrigatórios
+  if (!file || !largura || !altura) {
+    return showMensagem("Informe uma imagem, largura e altura corretamente.");
   }
 
   if (!pastaId) {
@@ -18,19 +31,20 @@ export async function uploadFoto(pastaId) {
   }
 
   const formData = new FormData();
-  formData.append("file", file);
-  formData.append("folder_id", pastaId);
-  formData.append("name", nome);
-  formData.append("width", largura);
-  formData.append("height", altura);
-  formData.append("internal_code", codigo);
+  formData.append("file", file); // 1. arquivo
+  formData.append("folder_id", pastaId); // 2. pasta
+  if (nome) formData.append("name", nome); // 3. nome (opcional)
+  formData.append("height", altura); // 4. altura (obrigatório)
+  formData.append("width", largura); // 5. largura (obrigatório)
+  if (codigo) formData.append("internal_code", codigo); // 6. código interno (opcional)
 
   console.log("📦 ENVIANDO FORM:", {
-    file,
+    file: file.name,
     folder_id: pastaId,
-    internal_code: codigo,
-    width: largura,
     height: altura,
+    width: largura,
+    name: nome,
+    internal_code: codigo,
   });
 
   toggleLoading(true);
@@ -41,15 +55,16 @@ export async function uploadFoto(pastaId) {
       body: formData,
     });
 
-    const text = await response.text();
-    console.log("📥 RESPOSTA:", text);
+    const texto = await response.text();
+    console.log("📥 RESPOSTA:", texto);
 
-    if (!response.ok) {
-      throw new Error("Erro no upload");
-    }
+    if (!response.ok) throw new Error("Erro no upload");
 
-    showMensagem("Upload realizado com sucesso!");
+    showMensagem("📸 Upload realizado com sucesso!");
+
+    // 🧼 Fecha modal e recarrega a pasta atual
     document.getElementById("modal-tirar-foto").classList.add("hidden");
+    await atualizar(pastaId);
   } catch (err) {
     console.error("❌ uploadFoto ERRO:", err);
     showMensagem("Erro ao enviar a foto. Tente novamente.");

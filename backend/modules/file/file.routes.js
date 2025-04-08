@@ -2,7 +2,9 @@ const express = require("express");
 const router = express.Router();
 const controller = require("./file.controller");
 const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ dest: "uploads/" }); // <- define a pasta de upload
+
+
 
 router.get("/", controller.getAll);
 router.get("/folder/:folder_id", controller.getByFolder);
