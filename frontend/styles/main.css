@@ -135,3 +135,23 @@ main {
   display: flex;
   justify-content: space-between;
 }
+
+.arquivo-item {
+  padding: 10px;
+  background-color: #fefefe;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-top: 5px;
+  font-size: 14px;
+  cursor: default;
+}
+.breadcrumb-path {
+  margin-top: 5px;
+  font-size: 13px;
+  color: #555;
+}
+.breadcrumb-link {
+  color: blue;
+  cursor: pointer;
+  text-decoration: underline;
+}

@@ -30,6 +30,15 @@ async function uploadFile(file, folder_id, name, width, height, code) {
     const driveId = driveRes?.data?.id;
     if (!driveId) throw new Error("Drive upload failed.");
 
+    // ✅ Permitir visualização pública da imagem
+    await drive.permissions.create({
+      fileId: driveId,
+      requestBody: {
+        role: "reader",
+        type: "anyone",
+      },
+    });
+
     // 🧠 Inserção no banco
     const [saved] = await db("files")
       .insert({

@@ -48,3 +48,20 @@
   font-style: italic;
   font-size: 15px;
 }
+
+.arquivo-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.arquivo-actions button {
+  padding: 4px 8px;
+  font-size: 13px;
+  background: #eee;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.arquivo-actions button:hover {
+  background-color: #ddd;
+}
