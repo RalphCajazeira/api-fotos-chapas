@@ -1,5 +1,0 @@
-@media (max-width: 600px) {
-  .menu-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
