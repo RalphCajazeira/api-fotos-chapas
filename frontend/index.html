@@ -10,6 +10,7 @@
     />
     <link rel="stylesheet" href="./styles/main.css" />
   </head>
+
   <body>
     <header class="nav-bar">
       <div class="nav-buttons">
@@ -68,6 +69,25 @@
             Cancelar
           </button>
           <button id="btnSalvarFoto">Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Mover Pasta -->
+    <div id="modal-mover" class="modal hidden">
+      <div class="modal-content">
+        <h3>📂 Selecionar destino</h3>
+        <div
+          id="modal-mover-content"
+          class="mini-navegacao"
+          style="text-align: left; margin-top: 10px"
+        ></div>
+        <div class="modal-actions">
+          <button
+            onclick="document.getElementById('modal-mover').classList.add('hidden')"
+          >
+            Cancelar
+          </button>
         </div>
       </div>
     </div>

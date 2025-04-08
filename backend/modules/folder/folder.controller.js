@@ -39,22 +39,29 @@ async function createFolder(req, res) {
   }
 }
 
-// ✏️ PUT /folders/:id → Renomear pasta
+// ✏️ PUT /folders/:id → Renomear e/ou mover pasta
 async function renameFolder(req, res) {
   try {
     const { id } = req.params;
-    const { newName } = req.body;
+    const { name, parent_id } = req.body;
 
-    if (!newName) {
+    if (!name) {
       return res
         .status(400)
-        .json({ success: false, error: "Missing 'newName' field" });
+        .json({ success: false, error: "Missing 'name' field" });
     }
 
-    const folder = await service.renameFolder(id, newName);
-    res.json({ success: true, data: folder });
+    const updated = await service.updateFolder(id, { name, parent_id });
+
+    if (!updated) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Folder not found" });
+    }
+
+    res.json({ success: true });
   } catch (err) {
-    if (!isProduction) console.error("❌ Controller error:", err.message);
+    console.error("❌ Controller error:", err.message);
     res.status(500).json({ success: false, error: err.message });
   }
 }

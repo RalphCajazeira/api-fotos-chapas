@@ -1,15 +1,27 @@
-import { listarPastas, listarArquivos, buscarCaminho } from "./folder.js";
+import {
+  listarPastas,
+  listarArquivos,
+  buscarCaminho,
+  excluirPasta,
+  renomearPasta,
+  moverPasta,
+} from "./folder.js";
 import { excluirArquivo } from "./file.js";
 
 export async function renderizarNavegacao(pastaAtualId, aoSelecionarPasta) {
   const navegacao = document.getElementById("navegacao");
   navegacao.innerHTML = "";
 
-  const pastas = await listarPastas(pastaAtualId);
+  const pastas = await listarPastas();
   const arquivos = await listarArquivos(pastaAtualId);
   const caminho = await buscarCaminho(pastaAtualId);
 
-  // 🔗 Breadcrumb
+  const pastasFiltradas = pastas.filter((p) => {
+    if (pastaAtualId === null) return p.parent_id === null;
+    return p.parent_id === pastaAtualId;
+  });
+
+  // Breadcrumb
   const header = document.createElement("div");
   header.classList.add("breadcrumb");
 
@@ -42,96 +54,102 @@ export async function renderizarNavegacao(pastaAtualId, aoSelecionarPasta) {
     pathSpan.appendChild(span);
   });
 
-  header.appendChild(pathSpan);
   navegacao.appendChild(header);
+  navegacao.appendChild(pathSpan);
 
-  // 🧾 Conteúdo (pastas + arquivos)
-  const lista = document.createElement("div");
-  lista.classList.add("navegacao");
+  // Render pastas com botões de ações
+  pastasFiltradas.forEach((pasta) => {
+    const container = document.createElement("div");
+    container.classList.add("pasta-item");
+    container.style.display = "flex";
+    container.style.alignItems = "center";
+    container.style.justifyContent = "space-between";
 
-  if (pastas.length === 0 && arquivos.length === 0) {
-    const vazio = document.createElement("div");
-    vazio.classList.add("mensagem");
-    vazio.textContent = "📂 Diretório vazio";
-    lista.appendChild(vazio);
-  }
+    const nomeBtn = document.createElement("button");
+    nomeBtn.textContent = "📁 " + pasta.name;
+    nomeBtn.onclick = () => aoSelecionarPasta(pasta.id);
+    nomeBtn.style.flex = "1";
+    nomeBtn.style.textAlign = "left";
 
-  pastas.forEach((pasta) => {
-    const item = document.createElement("div");
-    item.classList.add("pasta-item");
-    item.textContent = `📁 ${pasta.name}`;
-    item.onclick = () => aoSelecionarPasta(pasta.id);
-    lista.appendChild(item);
+    const actions = document.createElement("div");
+    actions.style.display = "flex";
+    actions.style.gap = "5px";
+
+    const btnRename = document.createElement("button");
+    btnRename.textContent = "✏️";
+    btnRename.title = "Renomear";
+    btnRename.onclick = async (e) => {
+      e.stopPropagation();
+      const novoNome = prompt("Novo nome da pasta:", pasta.name);
+      if (novoNome && novoNome.trim()) {
+        await renomearPasta(pasta.id, { name: novoNome });
+        await renderizarNavegacao(pastaAtualId, aoSelecionarPasta);
+      }
+    };
+
+    const btnMove = document.createElement("button");
+    btnMove.textContent = "🔀";
+    btnMove.title = "Mover para outra pasta";
+    btnMove.onclick = async (e) => {
+      e.stopPropagation();
+      const destino = prompt(
+        "ID da nova pasta-pai (deixe vazio para raiz):",
+        pasta.parent_id ?? ""
+      );
+      if (destino !== null) {
+        await moverPasta(pasta.id, destino === "" ? null : Number(destino));
+        await renderizarNavegacao(pastaAtualId, aoSelecionarPasta);
+      }
+    };
+
+    const btnDelete = document.createElement("button");
+    btnDelete.textContent = "🗑️";
+    btnDelete.title = "Excluir pasta";
+    btnDelete.onclick = async (e) => {
+      e.stopPropagation();
+      if (confirm("Deseja realmente excluir esta pasta?")) {
+        await excluirPasta(pasta.id);
+        await renderizarNavegacao(pastaAtualId, aoSelecionarPasta);
+      }
+    };
+
+    actions.appendChild(btnRename);
+    actions.appendChild(btnMove);
+    actions.appendChild(btnDelete);
+
+    container.appendChild(nomeBtn);
+    container.appendChild(actions);
+    navegacao.appendChild(container);
   });
 
+  // Render arquivos
   arquivos.forEach((arquivo) => {
-    const item = document.createElement("div");
-    item.classList.add("arquivo-item");
+    const div = document.createElement("div");
+    div.classList.add("file-item");
 
     const imagem = document.createElement("img");
     imagem.src = `https://drive.google.com/thumbnail?id=${arquivo.drive_id}`;
     imagem.alt = arquivo.name;
     imagem.referrerPolicy = "no-referrer";
+    imagem.style.maxWidth = "150px";
+    imagem.style.display = "block";
+    imagem.style.marginBottom = "4px";
 
-    // imagem.loading = "lazy";
-    imagem.classList.add("arquivo-preview");
+    const link = document.createElement("a");
+    link.href = `https://drive.google.com/uc?export=download&id=${arquivo.drive_id}`;
+    link.textContent = arquivo.name;
+    link.download = arquivo.name;
 
-    const texto = document.createElement("div");
-    texto.innerHTML = `<strong>${arquivo.name}</strong><br>${arquivo.width} x ${arquivo.height} - Cod. ${arquivo.internal_code}`;
-
-    const botoes = document.createElement("div"); // ✅ declarado uma única vez
-    botoes.classList.add("arquivo-actions");
-
-    const btnRenomear = document.createElement("button");
-    btnRenomear.textContent = "✏️ Renomear";
-    btnRenomear.onclick = async () => {
-      const novoNome = prompt("Novo nome:", arquivo.name);
-      const novaLargura = prompt("Nova largura:", arquivo.width);
-      const novaAltura = prompt("Nova altura:", arquivo.height);
-      const novoCodigo = prompt("Novo código interno:", arquivo.internal_code);
-
-      if (novoNome && novaLargura && novaAltura && novoCodigo) {
-        const { renomearArquivo } = await import("./file.js");
-        const atualizado = await renomearArquivo(arquivo.id, {
-          name: novoNome,
-          width: novaLargura,
-          height: novaAltura,
-          internal_code: novoCodigo,
-        });
-        if (atualizado) aoSelecionarPasta(pastaAtualId);
-      }
+    const excluirBtn = document.createElement("button");
+    excluirBtn.textContent = "🗑️";
+    excluirBtn.onclick = async () => {
+      await excluirArquivo(arquivo.id);
+      await renderizarNavegacao(pastaAtualId, aoSelecionarPasta);
     };
 
-    const btnMover = document.createElement("button");
-    btnMover.textContent = "📂 Mover";
-    btnMover.onclick = async () => {
-      const novoFolderId = prompt("ID da nova pasta:");
-      if (novoFolderId && !isNaN(novoFolderId)) {
-        const { moverArquivo } = await import("./file.js");
-        const movido = await moverArquivo(arquivo.id, parseInt(novoFolderId));
-        if (movido) aoSelecionarPasta(pastaAtualId);
-      }
-    };
-
-    const btnExcluir = document.createElement("button");
-    btnExcluir.textContent = "🗑️ Excluir";
-    btnExcluir.onclick = async () => {
-      if (confirm("Tem certeza que deseja excluir este arquivo?")) {
-        const { excluirArquivo } = await import("./file.js");
-        const ok = await excluirArquivo(arquivo.id);
-        if (ok) aoSelecionarPasta(pastaAtualId);
-      }
-    };
-
-    botoes.appendChild(btnRenomear);
-    botoes.appendChild(btnMover);
-    botoes.appendChild(btnExcluir);
-
-    item.appendChild(imagem);
-    item.appendChild(texto);
-    item.appendChild(botoes);
-    lista.appendChild(item);
+    div.appendChild(imagem);
+    div.appendChild(link);
+    div.appendChild(excluirBtn);
+    navegacao.appendChild(div);
   });
-
-  navegacao.appendChild(lista);
 }

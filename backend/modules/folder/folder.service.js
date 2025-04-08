@@ -140,6 +140,15 @@ async function getFoldersByParent(parentId) {
   }
 }
 
+async function updateFolder(id, data) {
+  return await db("folders")
+    .where({ id })
+    .update({
+      name: data.name,
+      parent_id: data.parent_id ?? null,
+    });
+}
+
 module.exports = {
   getAll,
   createFolder,
@@ -147,4 +156,5 @@ module.exports = {
   deleteFolder,
   getFolderById,
   getFoldersByParent,
+  updateFolder,
 };
